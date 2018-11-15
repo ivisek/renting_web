@@ -4,6 +4,8 @@ RentingWeb::Application.routes.draw do
 
   get 'about' => 'startup#about'
 
+  get 'calendar' => 'startup#calendar'
+
   get '/' => 'startup#index'
 
   root 'startup#index'
