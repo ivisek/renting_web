@@ -1,4 +1,13 @@
 RentingWeb::Application.routes.draw do
+
+  get 'contact' => 'startup#contact'
+
+  get 'about' => 'startup#about'
+
+  get '/' => 'startup#index'
+
+  root 'startup#index'
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
