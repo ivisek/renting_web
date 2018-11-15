@@ -127,3 +127,14 @@
         <p>If you should have any questions regarding Your stay in Zagreb please feel free to contact me.</p>	
       </div>
     </section>
+
+    <script>
+	$(document).ready(function() {
+	   $("#myCarousel").swiperight(function() {
+	      $(this).carousel('prev');
+	    });
+	   $("#myCarousel").swipeleft(function() {
+	      $(this).carousel('next');
+	   });
+	});
+	</script>
