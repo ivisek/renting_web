@@ -43,3 +43,7 @@ gem 'unicorn'
 # gem 'debugger'
 
 gem 'google-api-client'
+
+gem 'icalendar'
+
+gem 'pry-rails'
