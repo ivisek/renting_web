@@ -54,7 +54,7 @@ begin
   result = service.list_events(main_calendar_id, page_token: page_token)
   # result.items.each do |e|
   #   print e.summary + "\n"
-  #   # service.delete_event(main_calendar_id, e.id)
+  #   service.delete_event(main_calendar_id, e.id)
   # end
   if result.next_page_token != page_token
     page_token = result.next_page_token
@@ -179,12 +179,12 @@ all_events = all_airbnb_events + all_booking_events
 all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:start] and e[:end]}
 
 ## delete all events that are currently on google calendar but not on airbnb or booking
-    page_token = nil
+    # page_token = nil
     begin
       result = service.list_events(main_calendar_id, page_token: page_token)
       result.items.each do |ge|
         # print e.summary + "\n"
-        if !all_events.select {|item| item[:start][:date] == Date.parse(ge.start.date) and item[:end][:date] == Date.parse(ge.end.date) and item[:description] == ge.description}.first
+        if !all_events.select {|item| item[:start][:date].to_s == Date.parse(ge.start.date).to_s and item[:end][:date].to_s == Date.parse(ge.end.date).to_s and item[:description] == ge.description}.first
           service.delete_event(main_calendar_id, ge.id)
         end
       end
@@ -198,7 +198,7 @@ all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:start
 
 ## add all events from booking and airbnb whic are currently not on google calendar
 all_events.each do |ev|
-  if !google_calendar.items.select {|item| Date.parse(item.start.date) == ev[:start][:date] and Date.parse(item.end.date) == ev[:end][:date] and ge.description == ev[:description]}.first
+  if !google_calendar.items.select {|item| Date.parse(item.start.date).to_s == ev[:start][:date].to_s and Date.parse(item.end.date).to_s == ev[:end][:date].to_s and item.description == ev[:description]}.first
     event = Google::Apis::CalendarV3::Event.new(ev)
     service.insert_event(main_calendar_id, event)
   end
