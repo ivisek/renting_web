@@ -45,7 +45,7 @@ service.client_options.application_name = APPLICATION_NAME
 service.authorization = authorize
 
 
-## update public availible calendar
+## update public available calendar
 
 main_calendar_id = 'apartmentstino@gmail.com'
 
@@ -54,6 +54,7 @@ begin
   result = service.list_events(main_calendar_id, page_token: page_token)
   # result.items.each do |e|
   #   print e.summary + "\n"
+  #   # service.delete_event(main_calendar_id, e.id)
   # end
   if result.next_page_token != page_token
     page_token = result.next_page_token
@@ -63,12 +64,12 @@ begin
 end while !page_token.nil?
 
 # get all events on group calendar
-all_available_events = result
+google_calendar = result
 
 # delete all available events
-all_available_events.items.each do |e|
-  service.delete_event('apartmentstino@gmail.com', e.id)
-end
+# result.items.each do |e|
+#   service.delete_event(main_calendar_id, e.id)
+# end
 
 ## END update public available calendar
 
@@ -96,11 +97,13 @@ end
 airbnb_calendar = "https://www.airbnb.com/calendar/ical/162372.ics?s=32b743b183163ef304896c2cdd7d4c12"
 
 # Open a file or pass a string to the parser
-cal_file = open(airbnb_calendar) {|f| f.read }
+airbnb_cal_file = open(airbnb_calendar) {|f| f.read }
 
-events = Icalendar::Event.parse(cal_file)
+airbnb_events = Icalendar::Event.parse(airbnb_cal_file)
 
-events.each do |event|
+all_airbnb_events = []
+
+airbnb_events.each do |event|
   start_date = event.dtstart
   end_date = event.dtend
 
@@ -110,7 +113,7 @@ events.each do |event|
     flag = 'airbnb'
   end
 
-  event = Google::Apis::CalendarV3::Event.new(
+  event = {
     summary: "Not available (#{flag})",
     # location: '800 Howard St., San Francisco, CA 94103',
     description: "#{flag}" ,
@@ -122,13 +125,88 @@ events.each do |event|
     end: {
       date: end_date
       # time_zone: 'GMT+02:00/Belgrade',
-    },
-  )
+    }
+  }
 
-  result = service.insert_event(main_calendar_id, event)
+  all_airbnb_events << event
+  # result = service.insert_event(main_calendar_id, event)
 end
 
 ### END get airbnb calendar
+
+### get booking calendar
+
+booking_calendar = "https://admin.booking.com/hotel/hoteladmin/ical.html?t=TJHwK-iTbu42Kg2xvoCdymIphBTNNY7QgyQi6xwBQ8wWyVsfXt3MQVFSEwlYbrYgRby0S_LtlaE3Zz5_A_TJpuEgdvY6ej_6oES3tI-3vCk25dR_v6Aj50PC71VMhecbxqQKzJJQUwYMlwwGBZd0DLXtq6ieFggWFt6ihA"
+
+booking_cal_file = open(booking_calendar) {|f| f.read }
+
+booking_events = Icalendar::Event.parse(booking_cal_file)
+
+all_booking_events = []
+
+booking_events.each do |event|
+  start_date = event.dtstart
+  end_date = event.dtend
+
+  flag = "N/A"
+
+  if !event.summary.blank?
+    flag = 'booking'
+  end
+
+  event = {
+    summary: "Not available (#{flag})",
+    # location: '800 Howard St., San Francisco, CA 94103',
+    description: "#{flag}" ,
+
+    start: {
+      date: start_date
+      # time_zone: 'GMT+02:00/Belgrade',
+    },
+    end: {
+      date: end_date
+      # time_zone: 'GMT+02:00/Belgrade',
+    }
+  }
+
+  all_booking_events << event
+end
+
+### END get booking calendar
+
+all_events = all_airbnb_events + all_booking_events
+
+all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:start] and e[:end]}
+
+## delete all events that are currently on google calendar but not on airbnb or booking
+    page_token = nil
+    begin
+      result = service.list_events(main_calendar_id, page_token: page_token)
+      result.items.each do |ge|
+        # print e.summary + "\n"
+        if !all_events.select {|item| item[:start][:date] == Date.parse(ge.start.date) and item[:end][:date] == Date.parse(ge.end.date) and item[:description] == ge.description}.first
+          service.delete_event(main_calendar_id, ge.id)
+        end
+      end
+      if result.next_page_token != page_token
+        page_token = result.next_page_token
+      else
+        page_token = nil
+      end
+    end while !page_token.nil?
+    # service.delete_event(main_calendar_id, ge.id)
+
+## add all events from booking and airbnb whic are currently not on google calendar
+all_events.each do |ev|
+  if !google_calendar.items.select {|item| Date.parse(item.start.date) == ev[:start][:date] and Date.parse(item.end.date) == ev[:end][:date] and ge.description == ev[:description]}.first
+    event = Google::Apis::CalendarV3::Event.new(ev)
+    service.insert_event(main_calendar_id, event)
+  end
+end
+
+
+
+
 
 # busy_dates = response
 
