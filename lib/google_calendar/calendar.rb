@@ -63,9 +63,6 @@ begin
   end
 end while !page_token.nil?
 
-# get all events on group calendar
-google_calendar = result
-
 # delete all available events
 # result.items.each do |e|
 #   service.delete_event(main_calendar_id, e.id)
@@ -198,7 +195,7 @@ all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:start
 
 ## add all events from booking and airbnb whic are currently not on google calendar
 all_events.each do |ev|
-  if !google_calendar.items.select {|item| Date.parse(item.start.date).to_s == ev[:start][:date].to_s and Date.parse(item.end.date).to_s == ev[:end][:date].to_s and item.description == ev[:description]}.first
+  if !result.items.select {|item| Date.parse(item.start.date).to_s == ev[:start][:date].to_s and Date.parse(item.end.date).to_s == ev[:end][:date].to_s and item.description == ev[:description]}.first
     event = Google::Apis::CalendarV3::Event.new(ev)
     service.insert_event(main_calendar_id, event)
   end
