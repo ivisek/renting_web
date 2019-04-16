@@ -41,3 +41,5 @@ gem 'unicorn'
 
 # To use debugger
 # gem 'debugger'
+
+gem 'google-api-client'
