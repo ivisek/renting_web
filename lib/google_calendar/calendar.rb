@@ -5,13 +5,14 @@ require 'date'
 require 'fileutils'
 
 OOB_URI = 'urn:ietf:wg:oauth:2.0:oob'.freeze
-APPLICATION_NAME = 'Google Calendar API Ruby Quickstart'.freeze
+APPLICATION_NAME = 'apartments tino'.freeze
 CREDENTIALS_PATH = 'credentials.json'.freeze
 # The file token.yaml stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
 TOKEN_PATH = 'token.yaml'.freeze
-SCOPE = Google::Apis::CalendarV3::AUTH_CALENDAR_READONLY
+# SCOPE = Google::Apis::CalendarV3::AUTH_CALENDAR_READONLY
+SCOPE = Google::Apis::CalendarV3::AUTH_CALENDAR_EVENTS
 
 ##
 # Ensure valid credentials, either by restoring from the saved credentials
@@ -46,7 +47,7 @@ service.authorization = authorize
 # calendar_id = 'primary'
 calendar_id = 'de0a8jsvche186m2p4goa9jgnr06713r@import.calendar.google.com'
 response = service.list_events(calendar_id,
-                               max_results: 10,
+                               max_results: 100,
                                single_events: true,
                                order_by: 'startTime',
                                time_min: DateTime.now.rfc3339)
@@ -60,28 +61,40 @@ response.items.each do |event|
   puts "Not available: (#{start} - #{end_date})"
 end
 
-puts "#{service.list_calendar_lists.inspect}"
+# puts "#{service.list_calendar_lists.next_sync_token}"
 
-unavailable_dates = response
+busy_dates = response
 ## update public availibility calendar:
 
 availability_calendar_id = 'apartmentstino@gmail.com'
 
-unavailable_dates.items.each do |event|
+# get all events on group calendar
+all_available_events = service.list_events(availability_calendar_id)
+
+# delete all available events
+all_available_events.items.each do |e|
+  service.delete_event('apartmentstino@gmail.com', e.id)
+end
+
+busy_dates.items.each do |event|
   start_date = event.start.date || event.start.date_time
   end_date = event.end.date || event.end.date_time
 
+  start_date = Date.parse(start_date)
+  end_date = Date.parse(end_date)
+
   event = Google::Apis::CalendarV3::Event.new(
-    # summary: 'Google I/O 2015',
+    summary: 'Not available (A)',
     # location: '800 Howard St., San Francisco, CA 94103',
-    # description: 'A chance to hear more about Google\'s developer products.',
+    description: 'A',
+
     start: {
-      date_time: '#{start_date}'
-      # time_zone: 'America/Los_Angeles',
+      date: start_date
+      # time_zone: 'GMT+02:00/Belgrade',
     },
     end: {
-      date_time: '#{end_date}'
-      # time_zone: 'America/Los_Angeles',
+      date: end_date
+      # time_zone: 'GMT+02:00/Belgrade',
     },
     # recurrence: [
     #   'RRULE:FREQ=DAILY;COUNT=2'
