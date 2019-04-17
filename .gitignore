@@ -13,3 +13,8 @@
 # Ignore all logfiles and tempfiles.
 /log/*.log
 /tmp
+
+# Ignore google API tokens
+/lib/google_calendar/credential.json
+/lib/google_calendar/token.yaml
+/token.yaml
