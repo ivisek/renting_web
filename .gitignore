@@ -15,5 +15,5 @@
 /tmp
 
 # Ignore google API tokens
-/lib/google_calendar/credential.json
+/lib/google_calendar/credentials.json
 /token.yaml
