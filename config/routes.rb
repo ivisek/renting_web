@@ -6,6 +6,7 @@ RentingWeb::Application.routes.draw do
 
   get 'calendar' => 'startup#calendar'
   get 'privacy' => 'startup#privacy'
+  get 'attractions' => 'startup#attractions'
 
   get '/' => 'startup#index'
 
