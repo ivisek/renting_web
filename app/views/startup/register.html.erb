@@ -10,6 +10,8 @@
       <%= label_tag :last_name, 'Last Name' %>
       <%= text_field_tag :last_name, nil, class: 'form-control', placeholder: 'Last Name', required: true %>
     </div>
-    <%= submit_tag 'Send' %>
+    <%= submit_tag 'Send', id: 'submit_form' %>
+    <%= submit_tag 'Reset', id: 'reset_form' , remote: true, :style => "display: none;", :type => 'reset' %>
+
   <% end %>
 </div>
