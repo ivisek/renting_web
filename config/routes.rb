@@ -1,12 +1,12 @@
 RentingWeb::Application.routes.draw do
 
   get 'contact' => 'startup#contact'
-
   get 'about' => 'startup#about'
-
   get 'calendar' => 'startup#calendar'
   get 'privacy' => 'startup#privacy'
   get 'attractions' => 'startup#attractions'
+  get 'register' => 'startup#register'
+  post 'register' => 'startup#register'
 
   get '/' => 'startup#index'
 

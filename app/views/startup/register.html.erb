@@ -1,0 +1,15 @@
+<div class="container-fluid">
+  <%= form_tag do %>
+    <div class="form-group">
+      <%= label_tag :first_name, 'First Name' %>
+      <%= text_field_tag :first_name, nil, class: 'form-control', placeholder: 'First Name', required: true %>
+ 
+      <%= label_tag :middle_name, 'Middle Name' %>
+      <%= text_field_tag :middle_name, nil, class: 'form-control', placeholder: 'Middle Name' %>
+
+      <%= label_tag :last_name, 'Last Name' %>
+      <%= text_field_tag :last_name, nil, class: 'form-control', placeholder: 'Last Name', required: true %>
+    </div>
+    <%= submit_tag 'Send' %>
+  <% end %>
+</div>
