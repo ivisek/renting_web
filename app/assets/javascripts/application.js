@@ -14,3 +14,5 @@
 //= require popper
 //= require bootstrap-sprockets
 
+//= require_directory .
+//= require rails-ujs

@@ -4,8 +4,13 @@ class StartupController < ApplicationController
   end
 
   def register
-  	details = params.except(:utf8, :authenticity_token, :commit, :controller, :action)
-  	RegisterMailer.new_guest(details).deliver if !details.reject {|k, v| v.blank?}.blank?
+    return if request.method == "GET"
+    if params[:registration_data].blank? or params[:registration_data].reject {|k, v| v.blank?}.blank?
+      flash[:warning] = "Invalid request! #{DateTime.now}"
+      puts "invalid!!"
+    else
+  		RegisterMailer.new_guest(params[:registration_data]).deliver
+  		flash[:success] = "Registration mail sent!"
+    end
   end
-  
 end
