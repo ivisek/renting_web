@@ -129,6 +129,8 @@ airbnb_events.each do |event|
   # result = service.insert_event(main_calendar_id, event)
 end
 
+all_airbnb_events.reject! {|event| event[:end][:date] < Date.today } ## remove all old events from array - checkout date is in the past
+
 ### END get airbnb calendar
 
 ### get booking calendar
@@ -169,6 +171,8 @@ booking_events.each do |event|
   all_booking_events << event
 end
 
+## don't have to remove all old events from array - checkout date is in the past - because booking does not send these
+
 ### END get booking calendar
 
 all_events = all_airbnb_events + all_booking_events
@@ -181,6 +185,7 @@ all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:start
       result = service.list_events(main_calendar_id, page_token: page_token)
       result.items.each do |ge|
         # print e.summary + "\n"
+        next if Date.parse(ge.end.date) < Date.today # skip old events because they are not even in the all_events array
         if !all_events.select {|item| item[:start][:date].to_s == Date.parse(ge.start.date).to_s and item[:end][:date].to_s == Date.parse(ge.end.date).to_s and item[:description] == ge.description}.first
           service.delete_event(main_calendar_id, ge.id)
         end
@@ -193,7 +198,7 @@ all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:start
     end while !page_token.nil?
     # service.delete_event(main_calendar_id, ge.id)
 
-## add all events from booking and airbnb whic are currently not on google calendar
+## add all events from booking and airbnb which are currently not on google calendar
 all_events.each do |ev|
   if !result.items.select {|item| Date.parse(item.start.date).to_s == ev[:start][:date].to_s and Date.parse(item.end.date).to_s == ev[:end][:date].to_s and item.description == ev[:description]}.first
     event = Google::Apis::CalendarV3::Event.new(ev)
