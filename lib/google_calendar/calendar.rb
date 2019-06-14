@@ -104,6 +104,8 @@ airbnb_events.each do |event|
   start_date = event.dtstart
   end_date = event.dtend
 
+  next if end_date <= Date.today
+
   flag = "N/A"
 
   if !event.description.blank?
@@ -185,7 +187,7 @@ all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:start
       result = service.list_events(main_calendar_id, page_token: page_token)
       result.items.each do |ge|
         # print e.summary + "\n"
-        next if Date.parse(ge.end.date) < Date.today # skip old events because they are not even in the all_events array
+        next if Date.parse(ge.start.date) <= Date.today # next if Date.parse(ge.end.date) < Date.today # skip old events because they are not even in the all_events array
         if !all_events.select {|item| item[:start][:date].to_s == Date.parse(ge.start.date).to_s and item[:end][:date].to_s == Date.parse(ge.end.date).to_s and item[:description] == ge.description}.first
           service.delete_event(main_calendar_id, ge.id)
         end
