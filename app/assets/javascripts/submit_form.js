@@ -1,5 +1,3 @@
-//= require jquery3
-
 $(document).ready(function(){
 	$('#submit_form').click(function(e){
 		e.preventDefault();
