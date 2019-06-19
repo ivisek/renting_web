@@ -1,17 +1,47 @@
-<div class="container-fluid">
-  <%= form_tag do %>
-    <div class="form-group">
-      <%= label_tag :first_name, 'First Name' %>
-      <%= text_field_tag :first_name, nil, class: 'form-control', placeholder: 'First Name', required: true %>
- 
-      <%= label_tag :middle_name, 'Middle Name' %>
-      <%= text_field_tag :middle_name, nil, class: 'form-control', placeholder: 'Middle Name' %>
+<section class="py-5">
+  <div class="container-fluid m-4">
+    <%= form_tag do %>
+      <div class="form-group">
 
-      <%= label_tag :last_name, 'Last Name' %>
-      <%= text_field_tag :last_name, nil, class: 'form-control', placeholder: 'Last Name', required: true %>
-    </div>
-    <%= submit_tag 'Reset', id: 'reset_form', remote: true,:type => 'reset' %>
-  <% end %>
-    
-    <%= submit_tag 'Send', id: 'submit_form', remote: true %>
-</div>
+        <div class="row no-gutters justify-content-start">
+          <div class="col-0 p-1">
+            <%= radio_button_tag 'gender', 'male', false, :class => 'gender' %> Male
+          </div>
+          <div class="col-0 p-1">
+            <%= radio_button_tag 'gender', 'female', false, :class => 'gender' %> Female
+          </div>
+        </div>  
+
+        <%= label_tag :first_name, 'First Name' %>
+        <%= text_field_tag :first_name, nil, class: 'form-control', placeholder: 'First Name', required: true %>
+   
+        <%= label_tag :middle_name, 'Middle Name' %>
+        <%= text_field_tag :middle_name, nil, class: 'form-control', placeholder: 'Middle Name' %>
+
+        <%= label_tag :last_name, 'Last Name' %>
+        <%= text_field_tag :last_name, nil, class: 'form-control', placeholder: 'Last Name', required: true %>
+
+        <%= label_tag :birth_country, 'Country of birth' %>
+        <%= text_field_tag :birth_country, nil, class: 'form-control', placeholder: 'Country of birth', required: true %>
+
+        <%= label_tag :birth_city, 'City of birth' %>
+        <%= text_field_tag :birth_city, nil, class: 'form-control', placeholder: 'City of birth', required: true %>
+
+        <%= label_tag :birth_date, 'Date of birth' %>
+        <%= text_field_tag :birth_date, nil, class: 'form-control', placeholder: 'Date of birth', required: true %>
+
+        <%= label_tag :residence_country, 'Country of residence' %>
+        <%= text_field_tag :residence_country, nil, class: 'form-control', placeholder: 'Country of residence', required: true %>
+
+        <%= label_tag :residence_city, 'City of residence' %>
+        <%= text_field_tag :residence_city, nil, class: 'form-control', placeholder: 'City of residence', required: true %>
+
+        <%= label_tag :residence_address, 'Address of residence' %>
+        <%= text_field_tag :residence_address, nil, class: 'form-control', placeholder: 'Address of residence', required: true %>
+
+      </div>
+      <%= submit_tag 'Send', id: 'submit_form' %>
+      <%= submit_tag 'Reset', id: 'reset_form' , remote: true, :type => 'reset' %>
+    <% end %>
+  </div>
+</section>
