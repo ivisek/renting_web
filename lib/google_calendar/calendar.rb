@@ -200,6 +200,18 @@ all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:end] 
     end while !page_token.nil?
     # service.delete_event(main_calendar_id, ge.id)
 
+
+## must reload new calendar status - some events are deleted above
+begin
+  result = service.list_events(main_calendar_id, page_token: page_token)
+  
+  if result.next_page_token != page_token
+    page_token = result.next_page_token
+  else
+    page_token = nil
+  end
+end while !page_token.nil?
+
 ## add all events from booking and airbnb which are currently not on google calendar
 all_events.each do |ev|
 
