@@ -104,7 +104,7 @@ airbnb_events.each do |event|
   start_date = event.dtstart
   end_date = event.dtend
 
-  next if end_date <= Date.today
+  # next if end_date < Date.today
 
   flag = "N/A"
 
@@ -179,7 +179,7 @@ end
 
 all_events = all_airbnb_events + all_booking_events
 
-all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:start] and e[:end]}
+all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:end] and e[:start]}
 
 ## delete all events that are currently on google calendar but not on airbnb or booking
     # page_token = nil
@@ -202,6 +202,25 @@ all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:start
 
 ## add all events from booking and airbnb which are currently not on google calendar
 all_events.each do |ev|
+
+  # if some dates are blocked and some are on booking, airbnb makes on longer event
+  # booking doesn't show blocked dates
+  if !["booking", "airbnb"].include? ev[:description]
+    matching_end_date = all_events.select {|e| (["booking", "airbnb"].include? e[:description])}.select {|ee| ev[:end][:date].to_s == ee[:end][:date].to_s}.first
+    matching_start_date = all_events.select {|e| (["booking", "airbnb"].include? e[:description])}.select {|ee| ev[:start][:date].to_s == ee[:start][:date].to_s}.first
+
+    if matching_start_date
+      # if existing event on booking or airbnb with the same start date, get its end date and modify current start date to that date
+      ev[:start][:date] = matching_start_date[:end][:date]
+    end
+
+    if matching_end_date
+      # if existing event on booking or airbnb with the same end date, get its start date and modify current end date to that date
+      ev[:end][:date] = matching_end_date[:start][:date]
+    end
+
+  end
+
   if !result.items.select {|item| Date.parse(item.start.date).to_s == ev[:start][:date].to_s and Date.parse(item.end.date).to_s == ev[:end][:date].to_s and item.description == ev[:description]}.first
     event = Google::Apis::CalendarV3::Event.new(ev)
     service.insert_event(main_calendar_id, event)
