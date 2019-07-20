@@ -189,6 +189,8 @@ all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:end] 
         # print e.summary + "\n"
         next if Date.parse(ge.end.date) < Date.today # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
         if !all_events.select {|item| item[:start][:date].to_s == Date.parse(ge.start.date).to_s and item[:end][:date].to_s == Date.parse(ge.end.date).to_s and item[:description] == ge.description}.first
+          # try to avoid deleting booking events
+          next if DateTime.now.in_time_zone("CET").hour > 20
           service.delete_event(main_calendar_id, ge.id)
         end
       end
