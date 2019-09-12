@@ -5,7 +5,7 @@ class StartupController < ApplicationController
 
   def register
     return if request.method == "GET"
-    if params[:registration_data].blank? or params[:registration_data].reject {|k, v| v.blank?}.blank?
+    if params[:registration_data].blank? or params[:registration_data].reject {|k, v| v.blank? or v == "undefined"}.blank?
       flash[:warning] = "Invalid request! #{DateTime.now}"
       puts "invalid!!"
     else

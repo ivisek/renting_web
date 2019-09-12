@@ -7,11 +7,11 @@ require 'open-uri'
 
 OOB_URI = 'urn:ietf:wg:oauth:2.0:oob'.freeze
 APPLICATION_NAME = 'apartments tino'.freeze
-CREDENTIALS_PATH = 'lib/google_calendar/credentials.json'.freeze
+CREDENTIALS_PATH = 'lib/google_calendar/credentials_kruziceva.json'.freeze
 # The file token.yaml stores the user's access and refresh tokens, and is
 # created automatically when the authorization flow completes for the first
 # time.
-TOKEN_PATH = 'token.yaml'.freeze
+TOKEN_PATH = 'token_kruziceva.yaml'.freeze
 # SCOPE = Google::Apis::CalendarV3::AUTH_CALENDAR_READONLY
 SCOPE = Google::Apis::CalendarV3::AUTH_CALENDAR_EVENTS
 
