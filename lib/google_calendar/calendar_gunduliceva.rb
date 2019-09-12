@@ -87,6 +87,7 @@ airbnb_calendars = {
 }
 
 all_airbnb_events = []
+all_cleaning_events = []
 
 (1..5).each do |room|
   airbnb_cal_file = open(airbnb_calendars[room]) {|f| f.read }
@@ -105,6 +106,7 @@ all_airbnb_events = []
 
     if !event.description.blank?
       flag = 'airbnb'
+      all_cleaning_events << {:start => {:date_time => (end_date + 8.hours).to_datetime, :time_zone => 'GMT+02:00/Belgrade'}, :end => {:date_time => (end_date + 13.hours).to_datetime, :time_zone => 'GMT+02:00/Belgrade'}, :summary => "Room #{room}"}
     else
       next
     end
@@ -198,5 +200,65 @@ all_events.each do |ev|
     service.insert_event(main_calendar_id, event)
   end
 end
+
+# update cleaning calendar
+
+cleaning_calendar_id = 'f40o70phjrasd4v6r3q6q4bk08@group.calendar.google.com'
+
+page_token = nil
+begin
+  result = service.list_events(cleaning_calendar_id, page_token: page_token)
+  # result.items.each do |e|
+  #   print e.summary + "\n"
+  #   service.delete_event(main_calendar_id, e.id)
+  # end
+  if result.next_page_token != page_token
+    page_token = result.next_page_token
+  else
+    page_token = nil
+  end
+end while !page_token.nil?
+
+## delete all events that are currently on google calendar but not on airbnb or booking
+    # page_token = nil
+begin
+  result = service.list_events(cleaning_calendar_id, page_token: page_token)
+  result.items.each do |ge|
+    # print e.summary + "\n"
+    next if ge.end.date < Date.today # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
+    if !all_cleaning_events.select {|item| item[:start][:date_time].to_s == ge.start.date_time.to_s and item[:end][:date_time].to_s == ge.end.date_time.to_s and item[:summary] == ge.summary}.first
+      # try to avoid deleting booking events
+      next if DateTime.now.in_time_zone("CET").hour > 20
+      service.delete_event(cleaning_calendar_id, ge.id)
+    end
+  end
+  if result.next_page_token != page_token
+    page_token = result.next_page_token
+  else
+    page_token = nil
+  end
+end while !page_token.nil?
+
+## must reload new calendar status - some events are deleted above
+begin
+  result = service.list_events(cleaning_calendar_id, page_token: page_token)
+  
+  if result.next_page_token != page_token
+    page_token = result.next_page_token
+  else
+    page_token = nil
+  end
+end while !page_token.nil?
+
+## add all events from booking and airbnb which are currently not on google calendar
+all_cleaning_events.each do |ev|
+
+  if !result.items.select {|item| item.start.date_time.to_date.to_s == ev[:start][:date_time].to_s and item.end.date.to_date_time.to_s == ev[:end][:date_time].to_s and item.summary == ev[:summary]}.first
+    event = Google::Apis::CalendarV3::Event.new(ev)
+    service.insert_event(cleaning_calendar_id, event)
+  end
+end
+
+
 
 puts "DONE!!"
