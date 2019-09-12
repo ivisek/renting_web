@@ -100,7 +100,7 @@ all_cleaning_events = []
 
     next if end_date.to_date < start_date.to_date # some new bug in airbnb calendar??
 
-    # next if end_date < Date.today
+    next if end_date < Date.today + 1.day # +1 day because of cleaning day
 
     flag = "N/A"
 
