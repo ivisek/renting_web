@@ -89,6 +89,8 @@ airbnb_calendars = {
 all_airbnb_events = []
 all_cleaning_events = []
 all_new_arrivals_events = []
+all_unavailable_date_ranges = []
+all_available_dates = []
 
 (1..5).each do |room|
   airbnb_cal_file = open(airbnb_calendars[room]) {|f| f.read }
@@ -104,6 +106,9 @@ all_new_arrivals_events = []
     next if end_date < Date.today + 1.day # +1 day because of cleaning day
 
     flag = "N/A"
+    
+    unavailable_date_range = (start_date.to_date...end_date.to_date).to_a
+    all_unavailable_date_ranges << {:room => room, :dates => unavailable_date_range}
 
     if !event.description.blank?
       flag = 'airbnb'
@@ -329,6 +334,61 @@ end
 # result.items.each do |e|
 #   service.delete_event(arrivals_calendar_id, e.id)
 # end
+
+
+# update availability calendar
+
+availability_calendar_id = '483vs57s2ibg4rt27ktttehhso@group.calendar.google.com'
+
+page_token = nil
+begin
+  result = service.list_events(availability_calendar_id, page_token: page_token)
+  if result.next_page_token != page_token
+    page_token = result.next_page_token
+  else
+    page_token = nil
+  end
+end while !page_token.nil?
+
+# delete all available events
+result.items.each do |e|
+  service.delete_event(availability_calendar_id, e.id)
+end
+
+begin
+  result = service.list_events(availability_calendar_id, page_token: page_token)
+  if result.next_page_token != page_token
+    page_token = result.next_page_token
+  else
+    page_token = nil
+  end
+end while !page_token.nil?
+
+all_unavailable_date_ranges.group_by {|d_r| d_r[:room]}.map {|el| el[1]}.each do |one_room|
+  room_no = one_room.first[:room]
+  all_unavailable_dates = one_room.map {|r| r[:dates]}
+
+  (Date.today..(Date.today + 14.days)).to_a.each do |day|
+    available = true
+    if all_unavailable_dates.select {|range| range.include? day}.first
+      available = false
+      next
+    end
+
+    if available
+      all_available_dates << {:room => room_no, :date => day}
+    end
+  end 
+end
+
+
+
+## add all events from booking and airbnb which are currently not on google calendar
+all_available_dates.each do |ev|
+    ev_new = {:start => {:date => ev[:date]}, :end => {:date => ev[:date]}, :summary => "Room #{ev[:room]} available"}
+    event = Google::Apis::CalendarV3::Event.new(ev_new)
+    service.insert_event(availability_calendar_id, event)
+end
 
 
 puts "DONE!!"
