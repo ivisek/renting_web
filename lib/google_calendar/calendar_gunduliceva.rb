@@ -106,9 +106,12 @@ all_available_dates = []
     next if end_date < Date.today + 1.day # +1 day because of cleaning day
 
     flag = "N/A"
-    
+
     unavailable_date_range = (start_date.to_date...end_date.to_date).to_a
-    all_unavailable_date_ranges << {:room => room, :dates => unavailable_date_range}
+    
+    if (start_date.to_date < Date.today + 1.month)
+      all_unavailable_date_ranges << {:room => room, :dates => unavailable_date_range}
+    end
 
     if !event.description.blank?
       flag = 'airbnb'
@@ -381,12 +384,26 @@ all_unavailable_date_ranges.group_by {|d_r| d_r[:room]}.map {|el| el[1]}.each do
   end 
 end
 
+all_available_dates_ranges = [] # join days in ranges
+start_iteration = false
+first_iteration_day = nil
 
+all_available_dates.each_with_index do |av_date, date_index|
+  if date_index < all_available_dates.count-1 and ((av_date[:date] + 1.day) == all_available_dates[date_index+1][:date])
+    if !start_iteration
+      first_iteration_day = av_date[:date]
+    end
+    start_iteration = true
+  else
+    start_iteration = false
+    all_available_dates_ranges << {:room => av_date[:room], :start => {:date => first_iteration_day || av_date[:date]}, :end => {:date => av_date[:date]}, :summary => "Room #{av_date[:room]} available"}
+    first_iteration_day = nil
+  end
+end
 
 ## add all events from booking and airbnb which are currently not on google calendar
-all_available_dates.each do |ev|
-    ev_new = {:start => {:date => ev[:date]}, :end => {:date => ev[:date]}, :summary => "Room #{ev[:room]} available"}
-    event = Google::Apis::CalendarV3::Event.new(ev_new)
+all_available_dates_ranges.each do |ev|
+    event = Google::Apis::CalendarV3::Event.new(ev)
     service.insert_event(availability_calendar_id, event)
 end
 
