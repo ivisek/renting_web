@@ -341,7 +341,7 @@ end
 
 # update availability calendar
 
-availability_calendar_id = '483vs57s2ibg4rt27ktttehhso@group.calendar.google.com'
+availability_calendar_id = '7jata0ic2re4s4lemt7jhmfct4@group.calendar.google.com'
 
 page_token = nil
 begin
