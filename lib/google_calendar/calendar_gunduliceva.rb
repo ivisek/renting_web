@@ -353,19 +353,6 @@ begin
   end
 end while !page_token.nil?
 
-# delete all available events
-result.items.each do |e|
-  service.delete_event(availability_calendar_id, e.id)
-end
-
-begin
-  result = service.list_events(availability_calendar_id, page_token: page_token)
-  if result.next_page_token != page_token
-    page_token = result.next_page_token
-  else
-    page_token = nil
-  end
-end while !page_token.nil?
 
 all_unavailable_date_ranges.group_by {|d_r| d_r[:room]}.map {|el| el[1]}.each do |one_room|
   room_no = one_room.first[:room]
@@ -401,11 +388,55 @@ all_available_dates.each_with_index do |av_date, date_index|
   end
 end
 
+## delete all events that are currently on google calendar but not on airbnb or booking
+    # page_token = nil
+begin
+  result = service.list_events(availability_calendar_id, page_token: page_token)
+  result.items.each do |ge|
+    next if ge.end.date.blank? or (Date.parse(ge.end.date) < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
+    if !all_available_dates_ranges.select {|item| item[:start][:date].to_s == ge.start.date.to_s and item[:end][:date].to_s == ge.end.date.to_s and item[:summary] == ge.summary}.first
+      # try to avoid deleting booking events
+      next if DateTime.now.in_time_zone("CET").hour > 20
+      service.delete_event(availability_calendar_id, ge.id)
+    end
+  end
+  if result.next_page_token != page_token
+    page_token = result.next_page_token
+  else
+    page_token = nil
+  end
+end while !page_token.nil?
+
+## must reload new calendar status - some events are deleted above
+begin
+  result = service.list_events(availability_calendar_id, page_token: page_token)
+  
+  if result.next_page_token != page_token
+    page_token = result.next_page_token
+  else
+    page_token = nil
+  end
+end while !page_token.nil?
+
 ## add all events from booking and airbnb which are currently not on google calendar
 all_available_dates_ranges.each do |ev|
+
+  if !result.items.select {|item| item.start.date.to_date.to_s == ev[:start][:date].to_s and item.end.date.to_date.to_s == ev[:end][:date].to_s and item.summary == ev[:summary]}.first
     event = Google::Apis::CalendarV3::Event.new(ev)
     service.insert_event(availability_calendar_id, event)
+  end
 end
+
+# delete all available events
+# result.items.each do |e|
+#   service.delete_event(availability_calendar_id, e.id)
+# end
+
+## add all events from booking and airbnb which are currently not on google calendar
+# all_available_dates_ranges.each do |ev|
+#     event = Google::Apis::CalendarV3::Event.new(ev)
+#     service.insert_event(availability_calendar_id, event)
+# end
 
 
 puts "DONE!!"
