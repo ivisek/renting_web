@@ -78,6 +78,12 @@ airbnb_calendar_3 = "https://www.airbnb.com/calendar/ical/38097952.ics?s=ebc3f71
 airbnb_calendar_4 = "https://www.airbnb.com/calendar/ical/38069827.ics?s=8a89654dee390c24b237d6a96403d1f1"
 airbnb_calendar_5 = "https://www.airbnb.com/calendar/ical/37616807.ics?s=c31cf62bf249427ccfc5d2a6d9ccfb9e"
 
+booking_calendar_1 = ""
+booking_calendar_2 = "https://admin.booking.com/hotel/hoteladmin/ical.html?t=d358eafb-b5b7-4d84-b7e4-4328f3f34909"
+booking_calendar_3 = ""
+booking_calendar_4 = "https://admin.booking.com/hotel/hoteladmin/ical.html?t=89973b48-94fa-4332-9f60-8b66f3fe11db"
+booking_calendar_5 = "https://admin.booking.com/hotel/hoteladmin/ical.html?t=a1ca2c70-ec0e-41f2-b229-364463733cd9"
+
 airbnb_calendars = {
   1 => airbnb_calendar_1,
   2 => airbnb_calendar_2,
@@ -86,13 +92,23 @@ airbnb_calendars = {
   5 => airbnb_calendar_5
 }
 
+booking_calendars = {
+  1 => booking_calendar_1,
+  2 => booking_calendar_2,
+  3 => booking_calendar_3,
+  4 => booking_calendar_4,
+  5 => booking_calendar_5
+}
+
 all_airbnb_events = []
+all_booking_events = []
 all_cleaning_events = []
 all_new_arrivals_events = []
 all_unavailable_date_ranges = []
 all_available_dates = []
 
 (1..5).each do |room|
+  # airbnb:
   airbnb_cal_file = open(airbnb_calendars[room]) {|f| f.read }
   airbnb_events = Icalendar::Event.parse(airbnb_cal_file)
 
@@ -145,13 +161,69 @@ all_available_dates = []
 
     all_airbnb_events << airbnb_event
   end
+
+  ## booking:
+  next if booking_calendars[room].blank? # still no calendars for 1 and 3
+
+  booking_cal_file = open(booking_calendars[room]) {|f| f.read }
+  booking_events = Icalendar::Event.parse(booking_cal_file)
+
+  booking_events.each do |event|
+
+    start_date = event.dtstart
+    end_date = event.dtend
+
+    next if end_date.to_date < start_date.to_date # some new bug in airbnb calendar??
+
+    next if end_date < Date.today + 1.day # +1 day because of cleaning day
+
+    flag = "N/A"
+
+    unavailable_date_range = (start_date.to_date...end_date.to_date).to_a
+    
+    if (start_date.to_date < Date.today + 1.month)
+      all_unavailable_date_ranges << {:room => room, :dates => unavailable_date_range}
+    end
+
+    if !event.summary.blank?
+      flag = 'booking'
+      note = "" # event.description.to_s.split("\n").last
+      # if note.match(/10 Min Walk/) # if no note available
+      #   note = "?"
+      # end
+      nights_count = (start_date.to_date...end_date.to_date).count
+      all_cleaning_events << {:start => {:date_time => (end_date + 8.hours).to_datetime, :time_zone => 'GMT+02:00/Belgrade'}, :end => {:date_time => (end_date + 13.hours).to_datetime, :time_zone => 'GMT+02:00/Belgrade'}, :summary => "Room #{room}"}
+      all_new_arrivals_events << {:start => {:date => start_date}, :end => {:date => start_date}, :summary => "Room #{room} (#{note}) for #{nights_count} nights"}
+    else
+      next
+    end
+
+    booking_event = {
+      summary: "Room #{room} (#{event.summary})",
+      # location: '800 Howard St., San Francisco, CA 94103',
+      description: "#{flag}" ,
+
+      start: {
+        # date: (start_date + 13.hours).to_datetime,
+        date: start_date
+        # time_zone: 'GMT+02:00/Belgrade',
+      },
+      end: {
+        # date: (end_date + 8.hours).to_datetime,
+        date: end_date
+        # time_zone: 'GMT+02:00/Belgrade',
+      }
+    }
+
+    all_booking_events << booking_event
+  end
 end
 
 # airbnb_events.reject! {|event| event[:end][:date] < Date.today } ## remove all old events from array - checkout date is in the past
 
 ### END get airbnb calendar
 
-all_events = all_airbnb_events
+all_events = all_airbnb_events + all_booking_events
 
 # all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:end] and e[:start]}
 
@@ -353,7 +425,7 @@ begin
   end
 end while !page_token.nil?
 
-
+all_unavailable_date_ranges.uniq!
 all_unavailable_date_ranges.group_by {|d_r| d_r[:room]}.map {|el| el[1]}.each do |one_room|
   room_no = one_room.first[:room]
   all_unavailable_dates = one_room.map {|r| r[:dates]}
