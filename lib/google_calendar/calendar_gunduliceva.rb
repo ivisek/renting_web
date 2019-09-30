@@ -315,7 +315,7 @@ begin
     next if ge.end.date_time.blank? or (ge.end.date_time.to_date < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
     if !all_cleaning_events.select {|item| item[:start][:date_time].to_date.to_s == ge.start.date_time.to_date.to_s and item[:end][:date_time].to_date.to_s == ge.end.date_time.to_date.to_s and item[:summary] == ge.summary}.first
       # try to avoid deleting booking events
-      # next if DateTime.now.in_time_zone("CET").hour > 20
+      next if DateTime.now.in_time_zone("CET").hour > 20
       puts "deleted........#{ge.inspect}.............."
       service.delete_event(cleaning_calendar_id, ge.id)
     end
