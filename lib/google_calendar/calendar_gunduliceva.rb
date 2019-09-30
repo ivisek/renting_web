@@ -227,7 +227,6 @@ all_events = all_airbnb_events + all_booking_events
 
 # all_events = all_events.sort_by {|e| e[:description]}.reverse.uniq {|e| e[:end] and e[:start]}
 
-
 ## delete all events that are currently on google calendar but not on airbnb or booking
     # page_token = nil
 begin
@@ -235,7 +234,7 @@ begin
   result.items.each do |ge|
     # print e.summary + "\n"
     next if ge.end.date.blank? or (Date.parse(ge.start.date) < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
-    if !all_events.select {|item| item[:start][:date].to_s == ge.start.date.to_s and item[:end][:date].to_s == ge.end.date.to_s and item[:summary] == ge.summary}.first
+    if !all_events.select {|item| item[:start][:date].to_s == Date.parse(ge.start.date).to_s and item[:end][:date].to_s == Date.parse(ge.end.date).to_s and item[:summary] == ge.summary}.first
       # try to avoid deleting booking events
       next if DateTime.now.in_time_zone("CET").hour > 20
       service.delete_event(main_calendar_id, ge.id)
@@ -313,7 +312,7 @@ begin
   result.items.each do |ge|
     # print e.summary + "\n"
     next if ge.end.date.blank? or (Date.parse(ge.end.date) < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
-    if !all_cleaning_events.select {|item| item[:start][:date_time].to_date.to_s == ge.start.date_time.to_date.to_s and item[:end][:date_time].to_date.to_s == ge.end.date_time.to_date.to_s and item[:summary] == ge.summary}.first
+    if !all_cleaning_events.select {|item| item[:start][:date_time].to_date.to_s == Date.parse(ge.start.date).to_s and item[:end][:date_time].to_date.to_s == Date.parse(ge.end.date).to_s and item[:summary] == ge.summary}.first
       # try to avoid deleting booking events
       next if DateTime.now.in_time_zone("CET").hour > 20
       service.delete_event(cleaning_calendar_id, ge.id)
@@ -372,7 +371,7 @@ begin
   result = service.list_events(arrivals_calendar_id, page_token: page_token)
   result.items.each do |ge|
     next if ge.end.date.blank? or (Date.parse(ge.end.date) < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
-    if !all_new_arrivals_events.select {|item| item[:start][:date].to_s == ge.start.date.to_s and item[:end][:date].to_s == ge.end.date.to_s and item[:summary] == ge.summary}.first
+    if !all_new_arrivals_events.select {|item| item[:start][:date].to_s ==  Date.parse(ge.start.date).to_s and item[:end][:date].to_s == Date.parse(ge.end.date) and item[:summary] == ge.summary}.first
       # try to avoid deleting booking events
       next if DateTime.now.in_time_zone("CET").hour > 20
       service.delete_event(arrivals_calendar_id, ge.id)
@@ -466,7 +465,7 @@ begin
   result = service.list_events(availability_calendar_id, page_token: page_token)
   result.items.each do |ge|
     next if ge.end.date.blank? or (Date.parse(ge.end.date) < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
-    if !all_available_dates_ranges.select {|item| item[:start][:date].to_s == ge.start.date.to_s and item[:end][:date].to_s == ge.end.date.to_s and item[:summary] == ge.summary}.first
+    if !all_available_dates_ranges.select {|item| item[:start][:date].to_s == Date.parse(ge.start.date).to_s and item[:end][:date].to_s == Date.parse(ge.end.date) and item[:summary] == ge.summary}.first
       # try to avoid deleting booking events
       next if DateTime.now.in_time_zone("CET").hour > 20
       service.delete_event(availability_calendar_id, ge.id)
