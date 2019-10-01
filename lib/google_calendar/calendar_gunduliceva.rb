@@ -456,7 +456,7 @@ all_available_dates.each_with_index do |av_date, date_index|
     start_iteration = true
   else
     start_iteration = false
-    all_available_dates_ranges << {:room => av_date[:room], :start => {:date => first_iteration_day || av_date[:date]}, :end => {:date => av_date[:date]}, :summary => "Room #{av_date[:room]} available"}
+    all_available_dates_ranges << {:room => av_date[:room], :start => {:date => first_iteration_day || av_date[:date]}, :end => {:date => av_date[:date] +1.day}, :summary => "Room #{av_date[:room]} available"}
     first_iteration_day = nil
   end
 end
