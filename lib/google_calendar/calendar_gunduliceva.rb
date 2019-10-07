@@ -44,12 +44,9 @@ service = Google::Apis::CalendarV3::CalendarService.new
 service.client_options.application_name = APPLICATION_NAME
 service.authorization = authorize
 
-
-## update public available calendar
-
 main_calendar_id = 'apartments.gunduliceva@gmail.com'
 
-page_token = nil
+page_token, result = nil
 begin
   result = service.list_events(main_calendar_id, page_token: page_token)
   # result.items.each do |e|
@@ -62,6 +59,8 @@ begin
     page_token = nil
   end
 end while !page_token.nil?
+
+# result.items.map {|i| [i.start.date, i.summary]}
 
 # delete all available events
 # result.items.each do |e|
@@ -229,26 +228,19 @@ all_events = all_airbnb_events + all_booking_events
 
 ## delete all events that are currently on google calendar but not on airbnb or booking
     # page_token = nil
-begin
-  result = service.list_events(main_calendar_id, page_token: page_token)
-  result.items.each do |ge|
-    # print e.summary + "\n"
-    next if ge.end.date.blank? or (Date.parse(ge.start.date) < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
-    if !all_events.select {|item| item[:start][:date].to_date.to_s == Date.parse(ge.start.date).to_s and item[:end][:date].to_date.to_s == Date.parse(ge.end.date).to_s and item[:summary] == ge.summary}.first
-      # try to avoid deleting booking events
-      next if DateTime.now.in_time_zone("CET").hour > 20
-      # puts "deleted...............#{ge.inspect}.............."
-      service.delete_event(main_calendar_id, ge.id)
-    end
-  end
-  if result.next_page_token != page_token
-    page_token = result.next_page_token
-  else
-    page_token = nil
-  end
-end while !page_token.nil?
-    # service.delete_event(main_calendar_id, ge.id)
 
+result.items.each do |ge|
+  # print e.summary + "\n"
+  next if ge.end.date.blank? or (Date.parse(ge.end.date) < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
+  if !all_events.select {|item| item[:start][:date].to_date.to_s == Date.parse(ge.start.date).to_s and item[:end][:date].to_date.to_s == Date.parse(ge.end.date).to_s and item[:summary] == ge.summary}.first
+    # try to avoid deleting booking events
+    next if DateTime.now.in_time_zone("CET").hour > 20
+    # puts "deleted...............#{ge.inspect}.............."
+    service.delete_event(main_calendar_id, ge.id)
+  end
+end
+
+# service.delete_event(main_calendar_id, ge.id)
 
 ## must reload new calendar status - some events are deleted above
 begin
@@ -292,7 +284,6 @@ end
 
 cleaning_calendar_id = 'f40o70phjrasd4v6r3q6q4bk08@group.calendar.google.com'
 
-page_token = nil
 begin
   result = service.list_events(cleaning_calendar_id, page_token: page_token)
   # result.items.each do |e|
@@ -308,24 +299,17 @@ end while !page_token.nil?
 
 ## delete all events that are currently on google calendar but not on airbnb or booking
     # page_token = nil
-begin
-  result = service.list_events(cleaning_calendar_id, page_token: page_token)
-  result.items.each do |ge|
-    # print e.summary + "\n"
-    next if ge.end.date_time.blank? or (ge.end.date_time.to_date < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
-    if !all_cleaning_events.select {|item| item[:start][:date_time].to_date.to_s == ge.start.date_time.to_date.to_s and item[:end][:date_time].to_date.to_s == ge.end.date_time.to_date.to_s and item[:summary] == ge.summary}.first
-      # try to avoid deleting booking events
-      next if DateTime.now.in_time_zone("CET").hour > 20
-      puts "deleted........#{ge.inspect}.............."
-      service.delete_event(cleaning_calendar_id, ge.id)
-    end
+
+result.items.each do |ge|
+  # print e.summary + "\n"
+  next if ge.end.date_time.blank? or (ge.end.date_time.to_date < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
+  if !all_cleaning_events.select {|item| item[:start][:date_time].to_date.to_s == ge.start.date_time.to_date.to_s and item[:end][:date_time].to_date.to_s == ge.end.date_time.to_date.to_s and item[:summary] == ge.summary}.first
+    # try to avoid deleting booking events
+    next if DateTime.now.in_time_zone("CET").hour > 20
+    # puts "deleted........#{ge.inspect}.............."
+    service.delete_event(cleaning_calendar_id, ge.id)
   end
-  if result.next_page_token != page_token
-    page_token = result.next_page_token
-  else
-    page_token = nil
-  end
-end while !page_token.nil?
+end
 
 ## must reload new calendar status - some events are deleted above
 begin
@@ -357,7 +341,6 @@ end
 
 arrivals_calendar_id = 'ghea1dh2o2cht29c6utus98vb4@group.calendar.google.com'
 
-page_token = nil
 begin
   result = service.list_events(arrivals_calendar_id, page_token: page_token)
   if result.next_page_token != page_token
@@ -368,23 +351,14 @@ begin
 end while !page_token.nil?
 
 ## delete all events that are currently on google calendar but not on airbnb or booking
-    # page_token = nil
-begin
-  result = service.list_events(arrivals_calendar_id, page_token: page_token)
-  result.items.each do |ge|
-    next if ge.end.date.blank? or (Date.parse(ge.end.date) < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
-    if !all_new_arrivals_events.select {|item| item[:start][:date].to_date.to_s ==  Date.parse(ge.start.date).to_s and item[:end][:date].to_date.to_s == Date.parse(ge.end.date) and item[:summary] == ge.summary}.first
-      # try to avoid deleting booking events
-      next if DateTime.now.in_time_zone("CET").hour > 20
-      service.delete_event(arrivals_calendar_id, ge.id)
-    end
+result.items.each do |ge|
+  next if ge.end.date.blank? or (Date.parse(ge.end.date) < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
+  if !all_new_arrivals_events.select {|item| item[:start][:date].to_date.to_s == Date.parse(ge.start.date).to_s and item[:end][:date].to_date.to_s == Date.parse(ge.end.date) and item[:summary] == ge.summary}.first
+    # try to avoid deleting booking events
+    next if DateTime.now.in_time_zone("CET").hour > 20
+    service.delete_event(arrivals_calendar_id, ge.id)
   end
-  if result.next_page_token != page_token
-    page_token = result.next_page_token
-  else
-    page_token = nil
-  end
-end while !page_token.nil?
+end
 
 ## must reload new calendar status - some events are deleted above
 begin
@@ -416,7 +390,6 @@ end
 
 availability_calendar_id = '7jata0ic2re4s4lemt7jhmfct4@group.calendar.google.com'
 
-page_token = nil
 begin
   result = service.list_events(availability_calendar_id, page_token: page_token)
   if result.next_page_token != page_token
@@ -463,22 +436,15 @@ end
 
 ## delete all events that are currently on google calendar but not on airbnb or booking
     # page_token = nil
-begin
-  result = service.list_events(availability_calendar_id, page_token: page_token)
-  result.items.each do |ge|
-    next if ge.end.date.blank? or (Date.parse(ge.end.date) < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
-    if !all_available_dates_ranges.select {|item| item[:start][:date].to_s == Date.parse(ge.start.date).to_s and item[:end][:date].to_s == Date.parse(ge.end.date) and item[:summary] == ge.summary}.first
-      # try to avoid deleting booking events
-      next if DateTime.now.in_time_zone("CET").hour > 20
-      service.delete_event(availability_calendar_id, ge.id)
-    end
+
+result.items.each do |ge|
+  next if ge.end.date.blank? or (Date.parse(ge.end.date) < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
+  if !all_available_dates_ranges.select {|item| item[:start][:date].to_s == Date.parse(ge.start.date).to_s and item[:end][:date].to_s == Date.parse(ge.end.date) and item[:summary] == ge.summary}.first
+    # try to avoid deleting booking events
+    next if DateTime.now.in_time_zone("CET").hour > 20
+    service.delete_event(availability_calendar_id, ge.id)
   end
-  if result.next_page_token != page_token
-    page_token = result.next_page_token
-  else
-    page_token = nil
-  end
-end while !page_token.nil?
+end
 
 ## must reload new calendar status - some events are deleted above
 begin
