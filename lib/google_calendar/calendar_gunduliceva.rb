@@ -349,10 +349,13 @@ begin
   result = service.list_events(arrivals_calendar_id, page_token: page_token)
   if result.next_page_token != page_token
     page_token = result.next_page_token
+    result = service.list_events(arrivals_calendar_id, page_token: page_token)
   else
     page_token = nil
   end
 end while !page_token.nil?
+
+# result.items.map {|i| [i.start.date, i.summary]}
 
 ## delete all events that are currently on google calendar but not on airbnb or booking
 result.items.each do |ge|
@@ -400,6 +403,7 @@ begin
   result = service.list_events(availability_calendar_id, page_token: page_token)
   if result.next_page_token != page_token
     page_token = result.next_page_token
+    result = service.list_events(availability_calendar_id, page_token: page_token)
   else
     page_token = nil
   end
