@@ -243,6 +243,7 @@ end
 # service.delete_event(main_calendar_id, ge.id)
 
 ## must reload new calendar status - some events are deleted above
+page_token, result = nil
 begin
   result = service.list_events(main_calendar_id, page_token: page_token)
   
@@ -284,6 +285,7 @@ end
 
 cleaning_calendar_id = 'f40o70phjrasd4v6r3q6q4bk08@group.calendar.google.com'
 
+page_token, result = nil
 begin
   result = service.list_events(cleaning_calendar_id, page_token: page_token)
   # result.items.each do |e|
@@ -312,6 +314,7 @@ result.items.each do |ge|
 end
 
 ## must reload new calendar status - some events are deleted above
+page_token, result = nil
 begin
   result = service.list_events(cleaning_calendar_id, page_token: page_token)
   
@@ -341,6 +344,7 @@ end
 
 arrivals_calendar_id = 'ghea1dh2o2cht29c6utus98vb4@group.calendar.google.com'
 
+page_token, result = nil
 begin
   result = service.list_events(arrivals_calendar_id, page_token: page_token)
   if result.next_page_token != page_token
@@ -361,6 +365,7 @@ result.items.each do |ge|
 end
 
 ## must reload new calendar status - some events are deleted above
+page_token, result = nil
 begin
   result = service.list_events(arrivals_calendar_id, page_token: page_token)
   
@@ -390,6 +395,7 @@ end
 
 availability_calendar_id = '7jata0ic2re4s4lemt7jhmfct4@group.calendar.google.com'
 
+page_token, result = nil
 begin
   result = service.list_events(availability_calendar_id, page_token: page_token)
   if result.next_page_token != page_token
@@ -447,6 +453,7 @@ result.items.each do |ge|
 end
 
 ## must reload new calendar status - some events are deleted above
+page_token, result = nil
 begin
   result = service.list_events(availability_calendar_id, page_token: page_token)
   
