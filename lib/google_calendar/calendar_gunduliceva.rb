@@ -463,6 +463,7 @@ begin
   
   if result.next_page_token != page_token
     page_token = result.next_page_token
+    result = service.list_events(availability_calendar_id, page_token: page_token)
   else
     page_token = nil
   end
