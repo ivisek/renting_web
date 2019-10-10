@@ -346,10 +346,10 @@ arrivals_calendar_id = 'ghea1dh2o2cht29c6utus98vb4@group.calendar.google.com'
 
 page_token, result = nil
 begin
-  result = service.list_events(arrivals_calendar_id, page_token: page_token)
+  result = service.list_events(arrivals_calendar_id, page_token: page_token, single_events: true)
   if result.next_page_token != page_token
     page_token = result.next_page_token
-    result = service.list_events(arrivals_calendar_id, page_token: page_token)
+    result = service.list_events(arrivals_calendar_id, page_token: page_token, single_events: true)
   else
     page_token = nil
   end
@@ -370,7 +370,7 @@ end
 ## must reload new calendar status - some events are deleted above
 page_token, result = nil
 begin
-  result = service.list_events(arrivals_calendar_id, page_token: page_token)
+  result = service.list_events(arrivals_calendar_id, page_token: page_token, single_events: true)
   
   if result.next_page_token != page_token
     page_token = result.next_page_token
@@ -400,10 +400,10 @@ availability_calendar_id = '7jata0ic2re4s4lemt7jhmfct4@group.calendar.google.com
 
 page_token, result = nil
 begin
-  result = service.list_events(availability_calendar_id, page_token: page_token)
+  result = service.list_events(availability_calendar_id, page_token: page_token, single_events: true)
   if result.next_page_token != page_token
     page_token = result.next_page_token
-    result = service.list_events(availability_calendar_id, page_token: page_token)
+    result = service.list_events(availability_calendar_id, page_token: page_token, single_events: true)
   else
     page_token = nil
   end
@@ -459,11 +459,11 @@ end
 ## must reload new calendar status - some events are deleted above
 page_token, result = nil
 begin
-  result = service.list_events(availability_calendar_id, page_token: page_token)
+  result = service.list_events(availability_calendar_id, page_token: page_token, single_events: true)
   
   if result.next_page_token != page_token
     page_token = result.next_page_token
-    result = service.list_events(availability_calendar_id, page_token: page_token)
+    result = service.list_events(availability_calendar_id, page_token: page_token, single_events: true)
   else
     page_token = nil
   end
