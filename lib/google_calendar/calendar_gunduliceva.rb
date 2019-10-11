@@ -329,7 +329,7 @@ end while !page_token.nil?
 ## add all events from booking and airbnb which are currently not on google calendar
 all_cleaning_events.each do |ev|
 
-  if !result.items.select {|item| item.start.date_time.to_date.to_s == ev[:start][:date_time].to_date.to_s and item.end.date_time.to_date.to_s == ev[:end][:date_time].to_date.to_s and item.summary == ev[:summary]}.first
+  if !result.items.select {|item| item.start.date_time.to_date.to_s == ev[:start][:date_time].to_date.to_s and item.end.date_time.to_date.to_s == ev[:end][:date_time].to_date.to_s and item.summary.to_s.match("#{ev[:summary].to_s}")}.first
     event = Google::Apis::CalendarV3::Event.new(ev)
     service.insert_event(cleaning_calendar_id, event)
   end
