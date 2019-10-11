@@ -309,6 +309,7 @@ result.items.each do |ge|
     # try to avoid deleting booking events
     next if DateTime.now.in_time_zone("CET").hour > 20
     # puts "deleted........#{ge.inspect}.............."
+    next if !ge.description.blank? # skip events that are updated manually by me.... some guests pay directly and that is not shown on airbnb/booking
     service.delete_event(cleaning_calendar_id, ge.id)
   end
 end
