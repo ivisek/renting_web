@@ -305,7 +305,7 @@ end while !page_token.nil?
 result.items.each do |ge|
   # print e.summary + "\n"
   next if ge.end.date_time.blank? or (ge.end.date_time.to_date < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
-  if !all_cleaning_events.select {|item| item[:start][:date_time].to_date.to_s == ge.start.date_time.to_date.to_s and item[:end][:date_time].to_date.to_s == ge.end.date_time.to_date.to_s and item[:summary] == ge.summary}.first
+  if !all_cleaning_events.select {|item| item[:start][:date_time].to_date.to_s == ge.start.date_time.to_date.to_s and item[:end][:date_time].to_date.to_s == ge.end.date_time.to_date.to_s and ge.summary.to_s.match("#{item[:summary].to_s}")}.first
     # try to avoid deleting booking events
     next if DateTime.now.in_time_zone("CET").hour > 20
     # puts "deleted........#{ge.inspect}.............."
