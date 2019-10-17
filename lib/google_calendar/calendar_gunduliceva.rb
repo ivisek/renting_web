@@ -136,7 +136,7 @@ all_available_dates = []
       end
       nights_count = (start_date.to_date...end_date.to_date).count
       all_cleaning_events << {:start => {:date_time => (end_date + 8.hours).to_datetime, :time_zone => 'GMT+02:00/Belgrade'}, :end => {:date_time => (end_date + 13.hours).to_datetime, :time_zone => 'GMT+02:00/Belgrade'}, :summary => "Room #{room}"}
-      all_new_arrivals_events << {:start => {:date => (start_date + 8.hours).to_date}, :end => {:date => (start_date + 9.hours).to_date}, :summary => "Room #{room} (#{note}) for #{nights_count} nights"}
+      all_new_arrivals_events << {:start => {:date => start_date}, :end => {:date => start_date}, :summary => "Room #{room} (#{note}) for #{nights_count} nights"}
     else
       next
     end
@@ -192,7 +192,7 @@ all_available_dates = []
       # end
       nights_count = (start_date.to_date...end_date.to_date).count
       all_cleaning_events << {:start => {:date_time => (end_date + 8.hours).to_datetime, :time_zone => 'GMT+02:00/Belgrade'}, :end => {:date_time => (end_date + 13.hours).to_datetime, :time_zone => 'GMT+02:00/Belgrade'}, :summary => "Room #{room}"}
-      all_new_arrivals_events << {:start => {:date => (start_date + 8.hours).to_date}, :end => {:date => (start_date + 9.hours).to_date}, :summary => "Room #{room} (#{note}) for #{nights_count} nights"}
+      all_new_arrivals_events << {:start => {:date => start_date, :end => {:date => start_date}, :summary => "Room #{room} (#{note}) for #{nights_count} nights"}
     else
       next
     end
@@ -361,7 +361,7 @@ end while !page_token.nil?
 ## delete all events that are currently on google calendar but not on airbnb or booking
 result.items.each do |ge|
   next if ge.end.date.blank? or (Date.parse(ge.end.date) < Date.today) # next if Date.parse(ge.start.date) < Date.today # # skip old events because they are not even in the all_events array
-  if !all_new_arrivals_events.select {|item| item[:start][:date].to_date.to_s == Date.parse(ge.start.date).to_s and item[:end][:date].to_date.to_s == Date.parse(ge.end.date) and item[:summary] == ge.summary}.first
+  if !all_new_arrivals_events.select {|item| item[:start][:date].to_date.to_s == Date.parse(ge.start.date).to_s and item[:summary] == ge.summary}.first
     # try to avoid deleting booking events
     next if DateTime.now.in_time_zone("CET").hour > 20
     service.delete_event(arrivals_calendar_id, ge.id)
@@ -383,7 +383,7 @@ end while !page_token.nil?
 ## add all events from booking and airbnb which are currently not on google calendar
 all_new_arrivals_events.each do |ev|
 
-  if !result.items.select {|item| item.start.date.to_date.to_s == ev[:start][:date].to_date.to_s and item.end.date.to_date.to_s == ev[:end][:date].to_date.to_s and item.summary == ev[:summary]}.first
+  if !result.items.select {|item| item.start.date.to_date.to_s == ev[:start][:date].to_date.to_s and item.summary == ev[:summary]}.first
     event = Google::Apis::CalendarV3::Event.new(ev)
     service.insert_event(arrivals_calendar_id, event)
   end
