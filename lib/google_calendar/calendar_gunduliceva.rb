@@ -364,6 +364,9 @@ result.items.each do |ge|
   if !all_new_arrivals_events.select {|item| item[:start][:date].to_date.to_s == Date.parse(ge.start.date).to_s and item[:summary] == ge.summary}.first
     # try to avoid deleting booking events
     next if DateTime.now.in_time_zone("CET").hour > 20
+
+    next if !ge.description.blank? # added manually
+    
     service.delete_event(arrivals_calendar_id, ge.id)
   end
 end
