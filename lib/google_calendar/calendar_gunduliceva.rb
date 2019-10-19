@@ -192,7 +192,7 @@ all_available_dates = []
       # end
       nights_count = (start_date.to_date...end_date.to_date).count
       all_cleaning_events << {:start => {:date_time => (end_date + 8.hours).to_datetime, :time_zone => 'GMT+02:00/Belgrade'}, :end => {:date_time => (end_date + 13.hours).to_datetime, :time_zone => 'GMT+02:00/Belgrade'}, :summary => "Room #{room}"}
-      all_new_arrivals_events << {:start => {:date => start_date, :end => {:date => start_date + 1.day}, :summary => "Room #{room} (#{note}) for #{nights_count} nights"}
+      all_new_arrivals_events << {:start => {:date => start_date, :end => {:date => (start_date + 1.day)}}, :summary => "Room #{room} (#{note}) for #{nights_count} nights"}
     else
       next
     end
