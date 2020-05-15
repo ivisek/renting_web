@@ -78,8 +78,8 @@ airbnb_calendar_4 = "https://www.airbnb.com/calendar/ical/38069827.ics?s=8a89654
 airbnb_calendar_5 = "https://www.airbnb.com/calendar/ical/37616807.ics?s=c31cf62bf249427ccfc5d2a6d9ccfb9e"
 
 booking_calendar_1 = "https://admin.booking.com/hotel/hoteladmin/ical.html?t=ec5bacac-ac21-4f95-86e1-c3473b7920aa"
-booking_calendar_2 = "https://admin.booking.com/hotel/hoteladmin/ical.html?t=d358eafb-b5b7-4d84-b7e4-4328f3f34909"
-booking_calendar_3 = "https://admin.booking.com/hotel/hoteladmin/ical.html?t=848b5993-0aed-49d1-ad86-92702bb14fce"
+booking_calendar_2 = "https://admin.booking.com/hotel/hoteladmin/ical.html?t=726f7dab-a9d7-4b93-bb75-a4950d45e1f9"
+booking_calendar_3 = "https://admin.booking.com/hotel/hoteladmin/ical.html?t=b40b154a-c618-454b-9cbb-2ec53b06e5cf"
 booking_calendar_4 = "https://admin.booking.com/hotel/hoteladmin/ical.html?t=89973b48-94fa-4332-9f60-8b66f3fe11db"
 booking_calendar_5 = "https://admin.booking.com/hotel/hoteladmin/ical.html?t=a1ca2c70-ec0e-41f2-b229-364463733cd9"
 
